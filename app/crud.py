@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app import models, schemas
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy import func
 
 # Patient
 def create_patient(db: Session, patient: schemas.PatientCreate):
@@ -55,3 +56,41 @@ def is_doctor_available(db: Session, doctor_id: int, start_time: datetime, end_t
 
     return conflict is None
 
+def generate_open_slots(db: Session, doctor_id: int, date: datetime.date, slot_minutes: int):
+    availabilities = db.query(models.DoctorAvailability).filter(
+        models.DoctorAvailability.doctor_id == doctor_id,
+        func.date(models.DoctorAvailability.start_time) <= date,
+        func.date(models.DoctorAvailability.end_time) >= date
+    ).all()
+
+    if not availabilities:
+        return []
+
+    appointments = db.query(models.Appointment).filter(
+        models.Appointment.doctor_id == doctor_id,
+        func.date(models.Appointment.start_time) == date,
+        models.Appointment.status == models.AppointmentStatus.scheduled
+    ).all()
+
+    taken_slots = [(a.start_time, a.end_time) for a in appointments]
+    open_slots = []
+
+    for avail in availabilities:
+        current = max(avail.start_time, datetime.combine(date, avail.start_time.time()))
+        end = min(avail.end_time, datetime.combine(date, avail.end_time.time()))
+
+        while current + timedelta(minutes=slot_minutes) <= end:
+            slot_end = current + timedelta(minutes=slot_minutes)
+            overlap = any(
+                s < slot_end and e > current for s, e in taken_slots
+            )
+
+            if not overlap:
+                open_slots.append({
+                    "start": current.strftime("%H:%M"),
+                    "end": slot_end.strftime("%H:%M")
+                })
+
+            current += timedelta(minutes=5)  # slide window in 5-min increments
+
+    return open_slots

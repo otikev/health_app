@@ -1,6 +1,6 @@
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
+from datetime import datetime, time
+from typing import Optional, List
 import enum
 
 class AppointmentStatus(str, enum.Enum):
@@ -55,3 +55,7 @@ class AvailabilityOut(AvailabilityCreate):
 
     class Config:
         orm_mode = True
+
+class TimeSlot(BaseModel):
+    start: str  # e.g. "09:00"
+    end: str

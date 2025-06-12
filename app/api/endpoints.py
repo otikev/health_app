@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app import crud, schemas, database
+from typing import List
+from datetime import date
+from app.schemas import TimeSlot
 
 router = APIRouter()
 
@@ -18,6 +21,15 @@ def create_patient(patient: schemas.PatientCreate, db: Session = Depends(get_db)
 @router.post("/doctors", response_model=schemas.DoctorOut)
 def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db)):
     return crud.create_doctor(db, doctor)
+
+@router.get("/doctors/{doctor_id}/available-slots", response_model=List[TimeSlot])
+def get_available_slots(
+    doctor_id: int,
+    date: date = Query(..., description="Date in YYYY-MM-DD format"),
+    duration_minutes: int = Query(30, ge=5, le=240, description="Desired appointment duration in minutes"),
+    db: Session = Depends(get_db)
+):
+    return crud.generate_open_slots(db, doctor_id, date, duration_minutes)
 
 @router.post("/appointments", response_model=schemas.AppointmentOut)
 def create_appointment(appt: schemas.AppointmentCreate, db: Session = Depends(get_db)):
