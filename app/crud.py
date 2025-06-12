@@ -36,20 +36,22 @@ def create_availability(db: Session, availability: schemas.AvailabilityCreate):
     db.refresh(db_avail)
     return db_avail
 
-def is_doctor_available(db: Session, doctor_id: int, appt_time: datetime) -> bool:
-    availabilities = db.query(models.DoctorAvailability).filter(
+def is_doctor_available(db: Session, doctor_id: int, start_time: datetime, end_time: datetime) -> bool:
+    available = db.query(models.DoctorAvailability).filter(
         models.DoctorAvailability.doctor_id == doctor_id,
-        models.DoctorAvailability.start_time <= appt_time,
-        models.DoctorAvailability.end_time >= appt_time
-    ).all()
+        models.DoctorAvailability.start_time <= start_time,
+        models.DoctorAvailability.end_time >= end_time
+    ).first()
 
-    if not availabilities:
+    if not available:
         return False
 
     conflict = db.query(models.Appointment).filter(
         models.Appointment.doctor_id == doctor_id,
-        models.Appointment.appointment_time == appt_time,
-        models.Appointment.status == models.AppointmentStatus.scheduled
+        models.Appointment.status == models.AppointmentStatus.scheduled,
+        models.Appointment.start_time < end_time,
+        models.Appointment.end_time > start_time
     ).first()
 
     return conflict is None
+

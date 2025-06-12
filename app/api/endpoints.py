@@ -21,7 +21,7 @@ def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db)):
 
 @router.post("/appointments", response_model=schemas.AppointmentOut)
 def create_appointment(appt: schemas.AppointmentCreate, db: Session = Depends(get_db)):
-    if not crud.is_doctor_available(db, appt.doctor_id, appt.appointment_time):
+    if not crud.is_doctor_available(db, appt.doctor_id, appt.start_time, appt.end_time):
         raise HTTPException(status_code=400, detail="Doctor not available at that time.")
     
     return crud.create_appointment(db, appt)

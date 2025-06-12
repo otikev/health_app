@@ -35,7 +35,8 @@ class DoctorOut(DoctorCreate):
 class AppointmentCreate(BaseModel):
     patient_id: int
     doctor_id: int
-    appointment_time: datetime
+    start_time: datetime
+    end_time: datetime
 
 class AppointmentOut(AppointmentCreate):
     id: int
