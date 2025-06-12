@@ -1,7 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime, time
 from typing import Optional, List
 import enum
+
+class Role(str, enum.Enum):
+    doctor = "doctor"
+    patient = "patient"
 
 class AppointmentStatus(str, enum.Enum):
     scheduled = "scheduled"
@@ -59,3 +63,20 @@ class AvailabilityOut(AvailabilityCreate):
 class TimeSlot(BaseModel):
     start: str  # e.g. "09:00"
     end: str
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    role: Role
+
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    role: Role
+
+    class Config:
+        orm_mode = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
