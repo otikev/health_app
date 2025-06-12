@@ -13,7 +13,8 @@ class Patient(Base):
     __tablename__ = "patients"
 
     id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
     email = Column(String, unique=True, index=True)
     phone = Column(String)
     insurance = Column(String)
@@ -24,7 +25,8 @@ class Doctor(Base):
     __tablename__ = "doctors"
 
     id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(String, nullable=False)
+    first_name = Column(String, nullable=False)
+    last_name = Column(String, nullable=False)
     specialization = Column(String, nullable=False)
 
     appointments = relationship("Appointment", back_populates="doctor")
@@ -40,3 +42,13 @@ class Appointment(Base):
 
     patient = relationship("Patient", back_populates="appointments")
     doctor = relationship("Doctor", back_populates="appointments")
+
+class DoctorAvailability(Base):
+    __tablename__ = "doctor_availabilities"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"))
+    start_time = Column(DateTime, nullable=False)
+    end_time = Column(DateTime, nullable=False)
+
+    doctor = relationship("Doctor", backref="availabilities")
