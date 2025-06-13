@@ -1,5 +1,5 @@
 // File: src/App.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
 
@@ -16,6 +16,9 @@ function App() {
   const [newDoctor, setNewDoctor] = useState({ email: "", password: "", first_name: "", last_name: "", specialization: "" });
   const [newPatient, setNewPatient] = useState({ first_name: "", last_name: "", email: "", phone: "", insurance: "" });
   const [appointment, setAppointment] = useState({ patient_id: "", doctor_id: "", start_time: "", end_time: "" });
+
+  const [patients, setPatients] = useState([]);
+  const [doctors, setDoctors] = useState([]);
 
   const login = async () => {
     const formData = new URLSearchParams();
@@ -74,6 +77,27 @@ function App() {
     }
   };
 
+  const fetchDoctorsAndPatients = async () => {
+    try {
+      const patientRes = await axios.get(`${API_BASE}/patients`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const doctorRes = await axios.get(`${API_BASE}/doctors`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPatients(patientRes.data);
+      setDoctors(doctorRes.data);
+    } catch (err) {
+      alert("Failed to load users");
+    }
+  };
+
+  useEffect(() => {
+    if (token && view === "admin") {
+      fetchDoctorsAndPatients();
+    }
+  }, [token, view]);
+
   if (!token) {
     return (
       <div className="app-container">
@@ -118,8 +142,20 @@ function App() {
 
         <div className="card">
           <h2>Schedule Appointment</h2>
-          <input placeholder="Patient ID" value={appointment.patient_id} onChange={(e) => setAppointment({ ...appointment, patient_id: e.target.value })} />
-          <input placeholder="Doctor ID" value={appointment.doctor_id} onChange={(e) => setAppointment({ ...appointment, doctor_id: e.target.value })} />
+          <select value={appointment.patient_id} onChange={(e) => setAppointment({ ...appointment, patient_id: e.target.value })}>
+            <option value="">Select Patient</option>
+            {patients.map((p) => (
+              <option key={p.id} value={p.id}>{p.user.email} - {p.first_name} {p.last_name}</option>
+            ))}
+          </select>
+
+          <select value={appointment.doctor_id} onChange={(e) => setAppointment({ ...appointment, doctor_id: e.target.value })}>
+            <option value="">Select Doctor</option>
+            {doctors.map((d) => (
+              <option key={d.id} value={d.id}>{d.user.email} - {d.first_name} {d.last_name}</option>
+            ))}
+          </select>
+
           <input placeholder="Start Time (ISO)" value={appointment.start_time} onChange={(e) => setAppointment({ ...appointment, start_time: e.target.value })} />
           <input placeholder="End Time (ISO)" value={appointment.end_time} onChange={(e) => setAppointment({ ...appointment, end_time: e.target.value })} />
           <button onClick={scheduleAppointment}>Schedule</button>
