@@ -57,6 +57,7 @@ class DoctorAvailability(Base):
 class Role(str, enum.Enum):
     doctor = "doctor"
     patient = "patient"
+    admin = "admin"
 
 class User(Base):
     __tablename__ = "users"

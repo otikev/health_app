@@ -5,6 +5,8 @@ from app.models import User
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
+from app.database import get_db
+from typing import Union, List
 import os
 
 SECRET_KEY = os.getenv("JWT_SECRET", "super-secret")
@@ -33,9 +35,20 @@ def decode_token(token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends()):
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     payload = decode_token(token)
     user = db.query(User).filter(User.email == payload.get("sub")).first()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+def require_role(roles: Union[str, List[str]]):
+    def role_checker(current_user: User = Depends(get_current_user)):
+        allowed_roles = [roles] if isinstance(roles, str) else roles
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access restricted to: {', '.join(allowed_roles)}"
+            )
+        return current_user
+    return role_checker
