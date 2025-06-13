@@ -59,3 +59,23 @@ hr {
   border: none;
   border-top: 1px solid #eee;
 }
+
+.slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.slot-button {
+  padding: 0.5rem 1rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.slot-button:hover {
+  background-color: #2980b9;
+}

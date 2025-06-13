@@ -19,6 +19,9 @@ function App() {
 
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [date, setDate] = useState(null);
+  const [duration, setDuration] = useState(null);
+  const [slots, setSlots] = useState(null);
 
   const login = async () => {
     const formData = new URLSearchParams();
@@ -33,6 +36,21 @@ function App() {
       alert("Login failed");
     }
   };
+
+  const fetchAvailableSlots = async () => {
+    if (!appointment.doctor_id || !date || !duration) {
+      alert("Select doctor, date and duration first");
+      return;
+    }
+
+    const res = await axios.get(`${API_BASE}/doctors/${appointment.doctor_id}/available-slots`, {
+      params: { date, duration_minutes: duration },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    setSlots(res.data);
+  };
+
 
   const register = async () => {
     try {
@@ -156,8 +174,30 @@ function App() {
             ))}
           </select>
 
-          <input placeholder="Start Time (ISO)" value={appointment.start_time} onChange={(e) => setAppointment({ ...appointment, start_time: e.target.value })} />
-          <input placeholder="End Time (ISO)" value={appointment.end_time} onChange={(e) => setAppointment({ ...appointment, end_time: e.target.value })} />
+          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input type="number" placeholder="Appointment Duration (mins)" value={duration} onChange={(e) => setDuration(Number(e.target.value))} />
+          <button onClick={fetchAvailableSlots}>Get Available Slots</button>
+
+          {slots.length > 0 && (
+            <div className="slot-list">
+              {slots.map((slot, idx) => (
+                <button
+                  key={idx}
+                  className="slot-button"
+                  onClick={() =>
+                    setAppointment({
+                      ...appointment,
+                      start_time: `${date}T${slot.start}`,
+                      end_time: `${date}T${slot.end}`,
+                    })
+                  }
+                >
+                  {slot.start} - {slot.end}
+                </button>
+              ))}
+            </div>
+          )}
+
           <button onClick={scheduleAppointment}>Schedule</button>
         </div>
       </div>
