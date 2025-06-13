@@ -17,11 +17,16 @@ function App() {
   const [newPatient, setNewPatient] = useState({ first_name: "", last_name: "", email: "", phone: "", insurance: "" });
   const [appointment, setAppointment] = useState({ patient_id: "", doctor_id: "", start_time: "", end_time: "" });
 
+  const [availability, setAvailability] = useState({
+      start_time: "",
+      end_time: "",
+    });
+
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [date, setDate] = useState(null);
   const [duration, setDuration] = useState(null);
-  const [slots, setSlots] = useState(null);
+  const [slots, setSlots] = useState([]);
 
   const login = async () => {
     const formData = new URLSearchParams();
@@ -173,7 +178,7 @@ function App() {
               <option key={d.id} value={d.id}>{d.user.email} - {d.first_name} {d.last_name}</option>
             ))}
           </select>
-
+          <label>Appointment Date</label>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           <input type="number" placeholder="Appointment Duration (mins)" value={duration} onChange={(e) => setDuration(Number(e.target.value))} />
           <button onClick={fetchAvailableSlots}>Get Available Slots</button>
@@ -199,6 +204,50 @@ function App() {
           )}
 
           <button onClick={scheduleAppointment}>Schedule</button>
+        </div>
+      </div>
+    );
+  } else if (view === "doctor"){
+
+    
+
+    const createAvailability = async () => {
+      try {
+        await axios.post(`${API_BASE}/availabilities`, availability, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        alert("Availability saved");
+        setAvailability({ start_time: "", end_time: "" });
+      } catch (err) {
+        alert("Failed to create availability");
+      }
+    };
+
+    return (
+      <div className="app-container">
+        <h1>Doctor Dashboard</h1>
+
+        <div className="card">
+          <h2>Set Availability</h2>
+          <label>Start Time</label>
+          <input
+            type="datetime-local"
+            value={availability.start_time}
+            onChange={(e) =>
+              setAvailability({ ...availability, start_time: e.target.value })
+            }
+          />
+
+          <label>End Time</label>
+          <input
+            type="datetime-local"
+            value={availability.end_time}
+            onChange={(e) =>
+              setAvailability({ ...availability, end_time: e.target.value })
+            }
+          />
+
+          <button onClick={createAvailability}>Save Availability</button>
         </div>
       </div>
     );

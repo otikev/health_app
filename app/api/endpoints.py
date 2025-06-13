@@ -4,7 +4,7 @@ from app import crud, schemas, database, models
 from typing import List
 from datetime import date
 from app.schemas import TimeSlot, UserCreate, UserOut, Token
-from app.models import User
+from app.models import User, Doctor
 from app.security import get_password_hash, verify_password, create_access_token, get_current_user, require_role
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database import get_db
@@ -78,5 +78,18 @@ def create_appointment(appt: schemas.AppointmentCreate, db: Session = Depends(ge
     return crud.create_appointment(db, appt)
 
 @router.post("/availabilities", response_model=schemas.AvailabilityOut)
-def create_availability(availability: schemas.AvailabilityCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("doctor"))):
-    return crud.create_availability(db, availability)
+def create_availability(
+    availability: schemas.AvailabilityCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_role("doctor"))
+):
+    doctor = (
+        db.query(Doctor)
+        .join(Doctor.user)
+        .filter(User.email == current_user.email)
+        .first()
+    )
+    if not doctor:
+        raise HTTPException(status_code=404, detail="Doctor profile not found")
+    
+    return crud.create_availability(db, doctor.id, availability)

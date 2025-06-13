@@ -60,8 +60,12 @@ def create_appointment(db: Session, appointment: schemas.AppointmentCreate):
     db.refresh(db_appointment)
     return db_appointment
 
-def create_availability(db: Session, availability: schemas.AvailabilityCreate):
-    db_avail = models.DoctorAvailability(**availability.dict())
+def create_availability(db: Session, doctor_id: int, availability: schemas.AvailabilityCreate):
+    db_avail = models.DoctorAvailability(
+        doctor_id=doctor_id,
+        start_time=availability.start_time,
+        end_time=availability.end_time
+    )
     db.add(db_avail)
     db.commit()
     db.refresh(db_avail)

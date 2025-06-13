@@ -70,7 +70,6 @@ class AppointmentOut(AppointmentCreate):
         orm_mode = True
 
 class AvailabilityCreate(BaseModel):
-    doctor_id: int
     start_time: datetime
     end_time: datetime
 
