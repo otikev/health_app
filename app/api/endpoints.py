@@ -31,11 +31,19 @@ def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/patients", response_model=schemas.PatientOut)
-def create_patient(patient: schemas.PatientCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+def create_patient(
+    patient: schemas.PatientCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_role("admin"))
+):
     return crud.create_patient(db, patient)
 
 @router.post("/doctors", response_model=schemas.DoctorOut)
-def create_doctor(doctor: schemas.DoctorCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+def create_doctor(
+    doctor: schemas.DoctorCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_role("admin"))
+):
     return crud.create_doctor(db, doctor)
 
 @router.get("/doctors/{doctor_id}/available-slots", response_model=List[TimeSlot])

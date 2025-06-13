@@ -13,23 +13,26 @@ class Patient(Base):
     __tablename__ = "patients"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
-    email = Column(String, unique=True, index=True)
     phone = Column(String)
     insurance = Column(String)
 
     appointments = relationship("Appointment", back_populates="patient")
+    user = relationship("User", back_populates="patient_profile")
 
 class Doctor(Base):
     __tablename__ = "doctors"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
     specialization = Column(String, nullable=False)
 
     appointments = relationship("Appointment", back_populates="doctor")
+    user = relationship("User", back_populates="doctor_profile")
 
 class Appointment(Base):
     __tablename__ = "appointments"
@@ -66,3 +69,5 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     role = Column(SqlEnum(Role), nullable=False)
+    doctor_profile = relationship("Doctor", back_populates="user", uselist=False)
+    patient_profile = relationship("Patient", back_populates="user", uselist=False)

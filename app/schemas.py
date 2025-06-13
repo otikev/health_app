@@ -6,7 +6,15 @@ import enum
 class Role(str, enum.Enum):
     doctor = "doctor"
     patient = "patient"
+    admin = "admin"
 
+class UserOut(BaseModel):
+    id: int
+    email: EmailStr
+    role: Role
+
+    class Config:
+        orm_mode = True
 class AppointmentStatus(str, enum.Enum):
     scheduled = "scheduled"
     completed = "completed"
@@ -16,11 +24,17 @@ class PatientCreate(BaseModel):
     first_name: str
     last_name: str
     email: str
+    password: str
     phone: Optional[str] = None
     insurance: Optional[str] = None
 
-class PatientOut(PatientCreate):
+class PatientOut(BaseModel):
     id: int
+    first_name: str
+    last_name: str
+    phone: Optional[str] = None
+    insurance: Optional[str] = None
+    user: UserOut
 
     class Config:
         orm_mode = True
@@ -29,9 +43,15 @@ class DoctorCreate(BaseModel):
     first_name: str
     last_name: str
     specialization: str
+    email: EmailStr
+    password: str
 
-class DoctorOut(DoctorCreate):
+class DoctorOut(BaseModel):
     id: int
+    first_name: str
+    last_name: str
+    specialization: str
+    user: UserOut
 
     class Config:
         orm_mode = True
@@ -68,14 +88,6 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     role: Role
-
-class UserOut(BaseModel):
-    id: int
-    email: EmailStr
-    role: Role
-
-    class Config:
-        orm_mode = True
 
 class Token(BaseModel):
     access_token: str

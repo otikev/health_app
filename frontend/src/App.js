@@ -13,7 +13,7 @@ function App() {
   const [userRole, setUserRole] = useState(null);
   const [view, setView] = useState("login");
 
-  const [newDoctor, setNewDoctor] = useState({ first_name: "", last_name: "", specialization: "" });
+  const [newDoctor, setNewDoctor] = useState({ email: "", password: "", first_name: "", last_name: "", specialization: "" });
   const [newPatient, setNewPatient] = useState({ first_name: "", last_name: "", email: "", phone: "", insurance: "" });
   const [appointment, setAppointment] = useState({ patient_id: "", doctor_id: "", start_time: "", end_time: "" });
 
@@ -43,8 +43,9 @@ function App() {
   const createDoctor = async () => {
     try {
       await axios.post(`${API_BASE}/doctors`, newDoctor, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+        headers: { Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json' 
+      }});
       alert("Doctor created");
     } catch (err) {
       alert("Failed to create doctor");
@@ -96,6 +97,8 @@ function App() {
 
         <div className="card">
           <h2>Add Doctor</h2>
+          <input placeholder="Email" value={newDoctor.email} onChange={(e) => setNewDoctor({ ...newDoctor, email: e.target.value })} />
+          <input type="password" placeholder="Password" value={newDoctor.password} onChange={(e) => setNewDoctor({ ...newDoctor, password: e.target.value })} />
           <input placeholder="First Name" value={newDoctor.first_name} onChange={(e) => setNewDoctor({ ...newDoctor, first_name: e.target.value })} />
           <input placeholder="Last Name" value={newDoctor.last_name} onChange={(e) => setNewDoctor({ ...newDoctor, last_name: e.target.value })} />
           <input placeholder="Specialization" value={newDoctor.specialization} onChange={(e) => setNewDoctor({ ...newDoctor, specialization: e.target.value })} />
@@ -104,9 +107,10 @@ function App() {
 
         <div className="card">
           <h2>Add Patient</h2>
+          <input placeholder="Email" value={newPatient.email} onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })} />
+          <input type="password" placeholder="Password" value={newPatient.password} onChange={(e) => setNewPatient({ ...newPatient, password: e.target.value })} />
           <input placeholder="First Name" value={newPatient.first_name} onChange={(e) => setNewPatient({ ...newPatient, first_name: e.target.value })} />
           <input placeholder="Last Name" value={newPatient.last_name} onChange={(e) => setNewPatient({ ...newPatient, last_name: e.target.value })} />
-          <input placeholder="Email" value={newPatient.email} onChange={(e) => setNewPatient({ ...newPatient, email: e.target.value })} />
           <input placeholder="Phone" value={newPatient.phone} onChange={(e) => setNewPatient({ ...newPatient, phone: e.target.value })} />
           <input placeholder="Insurance" value={newPatient.insurance} onChange={(e) => setNewPatient({ ...newPatient, insurance: e.target.value })} />
           <button onClick={createPatient}>Create Patient</button>

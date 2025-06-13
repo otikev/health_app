@@ -2,10 +2,26 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from datetime import datetime, timedelta
 from sqlalchemy import func
+from passlib.hash import bcrypt
 
 # Patient
 def create_patient(db: Session, patient: schemas.PatientCreate):
-    db_patient = models.Patient(**patient.dict())
+    user = models.User(
+        email=patient.email,
+        hashed_password=bcrypt.hash(patient.password),
+        role=models.Role.patient
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    db_patient = models.Patient(
+        user_id=user.id,
+        first_name=patient.first_name,
+        last_name=patient.last_name,
+        insurance=patient.insurance,
+        phone=patient.phone
+    )
     db.add(db_patient)
     db.commit()
     db.refresh(db_patient)
@@ -16,7 +32,21 @@ def get_patient(db: Session, patient_id: int):
 
 # Doctor
 def create_doctor(db: Session, doctor: schemas.DoctorCreate):
-    db_doctor = models.Doctor(**doctor.dict())
+    user = models.User(
+        email=doctor.email,
+        hashed_password=bcrypt.hash(doctor.password),
+        role=models.Role.doctor
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    db_doctor = models.Doctor(
+        user_id=user.id,
+        first_name=doctor.first_name,
+        last_name=doctor.last_name,
+        specialization=doctor.specialization
+    )
     db.add(db_doctor)
     db.commit()
     db.refresh(db_doctor)
