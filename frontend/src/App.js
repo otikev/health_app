@@ -1,4 +1,3 @@
-// File: src/App.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./App.css";
