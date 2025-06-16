@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SqlEnum
 from sqlalchemy.orm import relationship
-from datetime import datetime
 from app.database import Base
 import enum
 

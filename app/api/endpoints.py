@@ -12,7 +12,10 @@ from app.database import get_db
 router = APIRouter()
 
 @router.post("/register", response_model=UserOut)
-def register(user: UserCreate, db: Session = Depends(get_db)):
+def register(
+    user: UserCreate, 
+    db: Session = Depends(get_db)
+):
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     hashed = get_password_hash(user.password)
@@ -23,7 +26,10 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return db_user
 
 @router.post("/login", response_model=Token)
-def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(
+    form: OAuth2PasswordRequestForm = Depends(), 
+    db: Session = Depends(get_db)
+):
     user = db.query(User).filter(User.email == form.username).first()
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -71,7 +77,11 @@ def get_available_slots(
     return crud.generate_open_slots(db, doctor_id, date, duration_minutes)
 
 @router.post("/appointments", response_model=schemas.AppointmentOut)
-def create_appointment(appt: schemas.AppointmentCreate, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+def create_appointment(
+    appt: schemas.AppointmentCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_role("admin"))
+):
     if not crud.is_doctor_available(db, appt.doctor_id, appt.start_time, appt.end_time):
         raise HTTPException(status_code=400, detail="Doctor not available at that time.")
     
