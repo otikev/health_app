@@ -34,8 +34,8 @@ A full-stack web application built with **FastAPI** and **React** that supports:
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/healthcare-app.git
-cd healthcare-app
+git clone https://github.com/<your-username>/health_app.git
+cd health_app
 ```
 
 ### 2. Backend setup
