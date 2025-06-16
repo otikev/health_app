@@ -15,6 +15,7 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
+
 class AppointmentStatus(str, enum.Enum):
     scheduled = "scheduled"
     completed = "completed"
